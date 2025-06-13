@@ -11,5 +11,6 @@ OUTPUTS_DIR = os.path.join(ROOT_DIR, "outputs")
 
 
 DATA_DIR = os.path.join(ROOT_DIR, "data")
-PUBLICATION_FPATH = os.path.join(DATA_DIR, "publication.md")
-PUBLICATIONS_FPATH = os.path.join(DATA_DIR, "project_1_publications.json")
+PUBLICATION_PATH = os.path.join(DATA_DIR, "publication.md")
+PUBLICATION_MINI_PATH = os.path.join(DATA_DIR, "publication_mini.md")
+PUBLICATIONS_PATH = os.path.join(DATA_DIR, "project_1_publications.json")

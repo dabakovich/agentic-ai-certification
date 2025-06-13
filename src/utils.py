@@ -2,15 +2,18 @@ from langchain_openai import ChatOpenAI
 from langchain_ollama import ChatOllama
 from dotenv import load_dotenv
 import os
-from paths import ENV_FPATH, PUBLICATION_FPATH
+from paths import ENV_FPATH, PUBLICATION_PATH, PUBLICATION_MINI_PATH
 from pathlib import Path
+from langchain.chat_models.base import BaseChatModel
+from typing import Union, Optional
 
 GPT_MODEL = "gpt-4o-mini"
 
 # OLLAMA_MODEL = "deepseek-r1:1.5b"
+OLLAMA_MODEL = "llama3.1:8b"
 # OLLAMA_MODEL = "llama3.2:1b" # hernia
-# OLLAMA_MODEL = "llama3.2:3b" // hernia
-OLLAMA_MODEL = "gemma3:4b"
+# OLLAMA_MODEL = "llama3.2:3b" # hernia
+# OLLAMA_MODEL = "gemma3:4b"
 
 
 def get_llm(llm: str = "gpt"):
@@ -21,6 +24,19 @@ def get_llm(llm: str = "gpt"):
     else:
         raise ValueError(f"LLM {llm} not supported")
     
+
+def get_response_with_streaming_to_terminal(llm: BaseChatModel, prompt: any):
+    content = ""
+    for event in llm.stream(prompt):
+        content += event.content
+        print(event.content, end="", flush=True)
+    
+    # Create a response object with a content attribute
+    class Response:
+        def __init__(self, content):
+            self.content = content
+    
+    return Response(content)
 
 
 def load_env() -> None:
@@ -48,7 +64,8 @@ def load_publication():
         FileNotFoundError: If the file does not exist.
         IOError: If there's an error reading the file.
     """
-    file_path = Path(PUBLICATION_FPATH)
+    # file_path = Path(PUBLICATION_PATH)
+    file_path = Path(PUBLICATION_MINI_PATH)
 
     # Check if file exists
     if not file_path.exists():
@@ -60,3 +77,32 @@ def load_publication():
             return file.read()
     except IOError as e:
         raise IOError(f"Error reading publication file: {e}") from e
+    
+
+def save_text_to_file(
+    text: str, filepath: Union[str, Path], header: Optional[str] = None
+) -> None:
+    """Saves text content to a file, optionally with a header.
+
+    Args:
+        text: The content to write.
+        filepath: Destination path for the file.
+        header: Optional header text to include at the top.
+
+    Raises:
+        IOError: If the file cannot be written.
+    """
+    try:
+        filepath = Path(filepath)
+
+        # Create directory if it doesn't exist
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+
+        with open(filepath, "w", encoding="utf-8") as f:
+            if header:
+                f.write(f"# {header}\n")
+                f.write("# " + "=" * 60 + "\n\n")
+            f.write(text)
+
+    except IOError as e:
+        raise IOError(f"Error writing to file {filepath}: {e}") from e
