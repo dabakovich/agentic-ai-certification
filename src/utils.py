@@ -7,6 +7,7 @@ from pathlib import Path
 from langchain.chat_models.base import BaseChatModel
 from typing import Union, Optional
 import yaml
+import json
 
 GPT_MODEL = "gpt-4o-mini"
 
@@ -78,7 +79,29 @@ def load_publication():
             return file.read()
     except IOError as e:
         raise IOError(f"Error reading publication file: {e}") from e
+
+# Returns list of publications with title and description
+def load_publications(json_path):
+    """Load .json file and return as list of publications strings"""
     
+    # Load the .json file with array of objects
+    with open(json_path, "r", encoding="utf-8") as file:
+        data = json.load(file)
+    
+    # Print the number of publications
+    print(f"\nTotal publications loaded: {len(data)}")
+
+    # Extract publication description as strings and return
+    publications = [
+        {
+            "title": doc["title"],
+            "description": doc["publication_description"],
+            "id": doc["id"]
+        } for doc in data
+    ]
+    
+    return publications
+
 
 def save_text_to_file(
     text: str, filepath: Union[str, Path], header: Optional[str] = None
