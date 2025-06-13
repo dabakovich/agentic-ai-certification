@@ -1,0 +1,15 @@
+import os
+
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+ENV_FPATH = os.path.join(ROOT_DIR, ".env")
+
+SRC_DIR = os.path.join(ROOT_DIR, "src")
+
+
+OUTPUTS_DIR = os.path.join(ROOT_DIR, "outputs")
+
+
+DATA_DIR = os.path.join(ROOT_DIR, "data")
+PUBLICATION_FPATH = os.path.join(DATA_DIR, "publication.md")
+PUBLICATIONS_FPATH = os.path.join(DATA_DIR, "project_1_publications.json")
