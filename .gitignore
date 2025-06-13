@@ -38,6 +38,7 @@ env/
 data/
 *.log
 chroma/
+chats/
 
 # OS
 .DS_Store
