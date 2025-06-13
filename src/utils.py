@@ -6,6 +6,7 @@ from paths import ENV_FPATH, PUBLICATION_PATH, PUBLICATION_MINI_PATH
 from pathlib import Path
 from langchain.chat_models.base import BaseChatModel
 from typing import Union, Optional
+import yaml
 
 GPT_MODEL = "gpt-4o-mini"
 
@@ -106,3 +107,33 @@ def save_text_to_file(
 
     except IOError as e:
         raise IOError(f"Error writing to file {filepath}: {e}") from e
+
+
+def load_yaml_config(file_path: Union[str, Path]) -> dict:
+    """Loads a YAML configuration file.
+
+    Args:
+        file_path: Path to the YAML file.
+
+    Returns:
+        Parsed YAML content as a dictionary.
+
+    Raises:
+        FileNotFoundError: If the file does not exist.
+        yaml.YAMLError: If there's an error parsing YAML.
+        IOError: If there's an error reading the file.
+    """
+    file_path = Path(file_path)
+
+    # Check if file exists
+    if not file_path.exists():
+        raise FileNotFoundError(f"YAML config file not found: {file_path}")
+
+    # Read and parse the YAML file
+    try:
+        with open(file_path, "r", encoding="utf-8") as file:
+            return yaml.safe_load(file)
+    except yaml.YAMLError as e:
+        raise yaml.YAMLError(f"Error parsing YAML file: {e}") from e
+    except IOError as e:
+        raise IOError(f"Error reading YAML file: {e}") from e
