@@ -80,6 +80,7 @@ def load_publication():
     except IOError as e:
         raise IOError(f"Error reading publication file: {e}") from e
 
+
 # Returns list of publications with title and description
 def load_publications(json_path):
     """Load .json file and return as list of publications strings"""

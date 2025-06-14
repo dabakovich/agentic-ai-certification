@@ -133,6 +133,7 @@ def print_prompt_preview(prompt: str, max_length: int = 500) -> None:
 def build_system_prompt_from_config(
     config: Dict[str, Any],
     publication_content: str = "",
+    relevant_documents: List[str] = [],
 ) -> str:
     """Builds a system prompt string based on a config dictionary.
 
@@ -187,6 +188,27 @@ def build_system_prompt_from_config(
             "=== PUBLICATION CONTENT ===\n"
             f"{publication_content.strip()}\n"
             "=== END PUBLICATION CONTENT ==="
+        )
+
+    if relevant_documents:
+        prompt_parts.append(
+            "Here are the relevant documents:\n\n"
+            "=== RELEVANT DOCUMENTS ===\n"
+            f"{relevant_documents.strip()}\n"
+            "=== END RELEVANT DOCUMENTS ==="
+        )
+
+    return "\n\n".join(prompt_parts)
+
+def build_rag_assistant_prompt(relevant_documents: list[str]) -> str:
+    prompt_parts = []
+
+    if relevant_documents:
+        prompt_parts.append(
+            "Here are the relevant documents:\n\n"
+            "=== RELEVANT DOCUMENTS ===\n"
+            f"{relevant_documents}\n"
+            "=== END RELEVANT DOCUMENTS ==="
         )
 
     return "\n\n".join(prompt_parts)
