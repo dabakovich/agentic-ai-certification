@@ -12,10 +12,10 @@ import json
 GPT_MODEL = "gpt-4o-mini"
 
 # OLLAMA_MODEL = "deepseek-r1:1.5b"
-OLLAMA_MODEL = "llama3.1:8b"
+# OLLAMA_MODEL = "llama3.1:8b"
 # OLLAMA_MODEL = "llama3.2:1b" # hernia
 # OLLAMA_MODEL = "llama3.2:3b" # hernia
-# OLLAMA_MODEL = "gemma3:4b"
+OLLAMA_MODEL = "gemma3:4b"
 
 
 def get_llm(llm: str = "gpt"):
@@ -102,6 +102,12 @@ def load_publications(json_path):
     ]
     
     return publications
+
+
+def load_file(file_path: Union[str, Path]) -> str:
+    """Loads a file and returns its content as a string."""
+    with open(file_path, "r", encoding="utf-8") as file:
+        return file.read()
 
 
 def save_text_to_file(
