@@ -1,9 +1,9 @@
 import sys
-from llm import get_llm
+from llm.client import get_llm
 from langchain.schema import SystemMessage, HumanMessage, AIMessage
-from utils import load_yaml_config
+from common.utils import load_yaml_config
 from paths import PROMPT_CONFIG_FPATH
-from prompt_builder import build_prompt_from_config
+from llm.prompt_builder import build_prompt_from_config
 
 
 class Conversation:
