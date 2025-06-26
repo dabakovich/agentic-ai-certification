@@ -19,9 +19,28 @@ source venv/bin/activate  # On Unix/macOS
 pip install -r requirements.txt
 ```
 
+## LLM Setup
+
+### Option 1: OpenAI API
+
+1. Get your API key from [OpenAI](https://platform.openai.com/api-keys)
+2. Create a `.env` file in the project root and add your API key:
+
+```
+OPENAI_API_KEY=your-api-key-here
+```
+
+### Option 2: Local LLM with Ollama
+
+1. Install Ollama from [ollama.ai](https://ollama.ai)
+2. Run the model:
+
+```bash
+ollama run gemma3
+```
+
 ## Project Structure
 
 - `src/` - Source code directory
-- `tests/` - Test files
 - `data/` - Data files
 - `requirements.txt` - Project dependencies
