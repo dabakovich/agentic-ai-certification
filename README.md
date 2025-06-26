@@ -39,6 +39,14 @@ OPENAI_API_KEY=your-api-key-here
 ollama run gemma3
 ```
 
+## Usage
+
+To run the RAG assistant:
+
+```bash
+python src/rag_assistant/main.py
+```
+
 ## Project Structure
 
 - `src/` - Source code directory

@@ -5,7 +5,7 @@ from utils import load_env
 def main():
     load_env()
 
-    conv = Conversation("gemma")
+    conv = Conversation()
 
     conv.run()
 
