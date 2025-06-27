@@ -4,6 +4,7 @@ from paths import ENV_FPATH
 import yaml
 from pathlib import Path
 from typing import Union
+import json
 
 
 def load_env() -> None:
@@ -49,3 +50,27 @@ def load_yaml_config(file_path: Union[str, Path]) -> dict:
         raise yaml.YAMLError(f"Error parsing YAML file: {e}") from e
     except IOError as e:
         raise IOError(f"Error reading YAML file: {e}") from e
+
+
+# Returns list of publications with title and description
+def load_publications(json_path):
+    """Load .json file and return as list of publications strings"""
+
+    # Load the .json file with array of objects
+    with open(json_path, "r", encoding="utf-8") as file:
+        data = json.load(file)
+
+    # Print the number of publications
+    print(f"\nTotal publications loaded: {len(data)}")
+
+    # Extract publication description as strings and return
+    publications = [
+        {
+            "title": doc["title"],
+            "description": doc["publication_description"],
+            "id": doc["id"],
+        }
+        for doc in data
+    ]
+
+    return publications
