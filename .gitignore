@@ -35,6 +35,7 @@ env/
 .env
 
 # Data and logs
+chats/
 data/
 *.log
 chroma/

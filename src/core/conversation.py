@@ -7,6 +7,8 @@ from common.utils import load_yaml_config
 from paths import PROMPT_CONFIG_FPATH
 from llm.prompt_builder import build_prompt_from_config
 from langchain.chains.conversation.base import ConversationChain
+from vector_store import VectorStore
+from common.constants import prompt_template
 
 
 class Conversation:
@@ -18,6 +20,7 @@ class Conversation:
             return_messages=True,
         )
         self.conversation = ConversationChain(llm=self.llm, memory=self.memory)
+        self.vector_store = VectorStore("publications")
 
     def run(self):
         self.memory.chat_memory.add_message(
@@ -33,9 +36,11 @@ class Conversation:
             if user_input.lower() == "q":
                 break
 
-            self.memory.chat_memory.add_message(HumanMessage(content=user_input))
+            prompt = self.build_retrieval_prompt(user_input)
 
-            stream_generator = self.llm.stream(self.memory.chat_memory.messages)
+            stream_generator = self.llm.stream(
+                self.memory.chat_memory.messages + [HumanMessage(content=prompt)]
+            )
 
             response = ""
             sys.stdout.write("AI: ")
@@ -46,4 +51,17 @@ class Conversation:
 
             sys.stdout.write("\n")
 
+            self.memory.chat_memory.add_message(HumanMessage(content=user_input))
             self.memory.chat_memory.add_message(AIMessage(content=response))
+
+    def build_retrieval_prompt(self, user_input: str) -> str:
+        relevant_publications = self.vector_store.retrieve_publications(user_input)
+
+        context = "\n\n---\n\n".join(relevant_publications["documents"])
+
+        if context == "":
+            return "No relevant documents found"
+
+        prompt = prompt_template.format(context=context, question=user_input)
+
+        return prompt

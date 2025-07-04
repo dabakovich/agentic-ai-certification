@@ -22,6 +22,9 @@ class VectorStore:
             model_kwargs={"device": "mps"},
         )
 
+        # print number of documents in the collection
+        print(self.collection.count())
+
     def chunk_text(self, text: str, size: int = 1000, overlap: int = 200) -> list[str]:
         """
         Chunk text into smaller pieces.
@@ -69,7 +72,7 @@ class VectorStore:
         self,
         query: str,
         k: int = 5,
-        threshold: float = 0.4,
+        threshold: float = 0.5,
     ) -> list[dict]:
         """
         Retrieve publications from the vector store.
