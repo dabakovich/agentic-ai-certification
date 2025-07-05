@@ -5,6 +5,7 @@ import yaml
 from pathlib import Path
 from typing import Union
 import json
+from paths import MODELS_CONFIG_FPATH
 
 
 def load_env() -> None:
@@ -74,3 +75,23 @@ def load_publications(json_path):
     ]
 
     return publications
+
+
+# Return list of LLM choices from models.yaml as list of dictionaries with type (root keys) and name (gpt_nano, llama1b, etc.)
+def get_llm_choices():
+    models_config = load_yaml_config(MODELS_CONFIG_FPATH)
+    return [
+        {"type": model_type, "name": model_name}
+        for model_type, model_names in models_config.items()
+        for model_name in model_names
+    ]
+
+
+# Return list of files in a directory as list of strings
+def get_files_in_directory(directory_path: str) -> list[str]:
+    """Get all files in a directory and return them as a list of strings"""
+    return [
+        file.name
+        for file in Path(directory_path).iterdir()
+        if file.is_file() and not file.name.startswith(".")
+    ]
