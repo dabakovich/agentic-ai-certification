@@ -47,6 +47,61 @@ To run the RAG assistant, run the main module from the project's root directory:
 python src/main.py
 ```
 
+## Working with Publications
+
+This RAG assistant allows you to insert your own publications into a vector database and then ask questions about them. Here's how to use it:
+
+### Step 1: Prepare Your Publications
+
+Create a JSON file with your publications in the `data/` directory. Each publication must have the following required fields:
+
+```json
+[
+  {
+    "id": "unique-publication-id-1",
+    "title": "Your Publication Title",
+    "publication_description": "The full content or description of your publication. This is the main text that will be used to answer questions."
+  },
+  {
+    "id": "unique-publication-id-2",
+    "title": "Another Publication Title",
+    "publication_description": "Another publication's content or description..."
+  }
+]
+```
+
+**Required Fields:**
+
+- `id`: A unique identifier for the publication (string)
+- `title`: The title of the publication (string)
+- `publication_description`: The main content/description of the publication (string)
+
+### Step 2: Insert Publications into Vector Database
+
+1. Run the application:
+
+   ```bash
+   python src/main.py
+   ```
+
+2. Choose "Show vector store options" from the main menu
+
+3. Select "Insert new publications"
+
+4. Choose your JSON file from the list of files in the `data/` directory
+
+5. Wait for the publications to be processed and inserted into the vector database
+
+### Step 3: Ask Questions
+
+1. From the main menu, choose "Launch a conversation"
+
+2. Ask questions about your publications - the AI will search through your publications and provide answers based on their content
+
+3. Type 'q' to quit the conversation
+
+The system will automatically find relevant publications based on your questions and provide context-aware answers.
+
 ## Project Structure
 
 The project follows a modular structure to separate concerns and facilitate future development.
