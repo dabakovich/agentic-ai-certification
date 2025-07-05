@@ -15,6 +15,7 @@ chromadb==1.0.13
 click==8.2.1
 coloredlogs==15.0.1
 dataclasses-json==0.6.7
+dependency-injector==4.48.1
 distro==1.9.0
 durationpy==0.10
 editor==1.6.6

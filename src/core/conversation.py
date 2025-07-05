@@ -9,10 +9,16 @@ from llm.prompt_builder import build_prompt_from_config
 from langchain.chains.conversation.base import ConversationChain
 from vector_store import VectorStore
 from common.constants import prompt_template
+from container import Container
+from dependency_injector.wiring import Provide
 
 
 class Conversation:
-    def __init__(self, llm_name="gpt_nano"):
+    def __init__(
+        self,
+        llm_name="gpt_nano",
+        vector_store: VectorStore = Provide[Container.vector_store],
+    ):
         self.llm = get_llm(llm_name)
         self.prompts_config = load_yaml_config(PROMPT_CONFIG_FPATH)
         self.memory = ConversationBufferMemory(
@@ -20,7 +26,7 @@ class Conversation:
             return_messages=True,
         )
         self.conversation = ConversationChain(llm=self.llm, memory=self.memory)
-        self.vector_store = VectorStore("publications")
+        self.vector_store = vector_store
 
     def run(self):
         self.memory.chat_memory.add_message(

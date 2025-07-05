@@ -2,13 +2,17 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 import torch
 from vector_store.chromadb import ChromaDB
-from paths import VECTOR_DB_DIR
 
 
 class VectorStore:
-    def __init__(self, collection_name: str):
-        self.client = ChromaDB(VECTOR_DB_DIR)
+    def __init__(
+        self,
+        collection_name: str,
+        chromadb: ChromaDB,
+    ):
+        self.client = chromadb
         self.collection = self.client.get_collection(collection_name)
+        self.collection_name = collection_name
 
         self.device = (
             "cuda"
@@ -21,9 +25,6 @@ class VectorStore:
             model_name="sentence-transformers/all-MiniLM-L6-v2",
             model_kwargs={"device": "mps"},
         )
-
-        # print number of documents in the collection
-        print(self.collection.count())
 
     def chunk_text(self, text: str, size: int = 1000, overlap: int = 200) -> list[str]:
         """
@@ -96,3 +97,6 @@ class VectorStore:
         }
 
         return relevant_results
+
+    def clear_collection(self):
+        self.client.clear_collection(self.collection_name)
