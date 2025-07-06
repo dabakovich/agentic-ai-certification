@@ -22,8 +22,8 @@ class JokeState(BaseModel):
 
 def show_menu(state: JokeState) -> dict:
     print("-" * 80)
-    print(f"You fetched {len(state.jokes)} jokes.")
-    print("Select menu option:")
+    print(f"| MENU | Category: {state.category} | Jokes: {len(state.jokes)} |")
+    print("Select an option:")
 
     choices = {"Next joke": "n", "Change category": "c", "Exit": "q"}
 
