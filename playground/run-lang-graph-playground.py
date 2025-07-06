@@ -92,10 +92,6 @@ def exit_bot(state: JokeState) -> dict:
     return {"quit": True}
 
 
-def route_choice(state: JokeState) -> str:
-    return state.user_choice
-
-
 nodes = [
     {
         "name": "next_joke",
@@ -136,7 +132,7 @@ def build_joke_graph() -> CompiledStateGraph:
 
     workflow.add_conditional_edges(
         "show_menu",
-        route_choice,
+        lambda state: state.user_choice,
     )
 
     workflow.add_edge("next_joke", "show_menu")
