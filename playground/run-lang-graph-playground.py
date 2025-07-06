@@ -14,7 +14,7 @@ class Joke(BaseModel):
 
 class JokeState(BaseModel):
     jokes: Annotated[List[Joke], add] = []
-    user_choice: Literal["n", "c", "l", "q"] = "n"  # next, category, language, quit
+    user_choice: str = "next_joke"
     category: str = "neutral"
     language: str = "en"
     quit: bool = False
@@ -27,28 +27,25 @@ def show_menu(state: JokeState) -> dict:
     )
     print("Select an option:")
 
-    choices = {
-        "Next joke": "n",
-        "Change category": "c",
-        "Change language": "l",
-        "Exit": "q",
-    }
-
-    choice = inquirer.prompt(
+    result = inquirer.prompt(
         [
             inquirer.List(
-                "choice",
+                "description",
                 message="What option do you want to use?",
-                choices=choices.keys(),
+                choices=[node["description"] for node in nodes],
             )
         ]
     )
     print("-" * 80)
 
-    return {"user_choice": choices[choice["choice"]]}
+    user_choice = [
+        node["name"] for node in nodes if node["description"] == result["description"]
+    ][0]
+
+    return {"user_choice": user_choice}
 
 
-def fetch_joke(state: JokeState) -> dict:
+def next_joke(state: JokeState) -> dict:
     joke_text = get_joke(language=state.language, category=state.category)
     new_joke = Joke(text=joke_text, category=state.category)
     print(joke_text)
@@ -96,41 +93,53 @@ def exit_bot(state: JokeState) -> dict:
 
 
 def route_choice(state: JokeState) -> str:
-    if state.user_choice == "n":
-        return "fetch_joke"
-    elif state.user_choice == "c":
-        return "update_category"
-    elif state.user_choice == "l":
-        return "change_language"
-    elif state.user_choice == "q":
-        return "exit_bot"
+    return state.user_choice
 
-    return "exit_bot"
+
+nodes = [
+    {
+        "name": "next_joke",
+        "short": "n",
+        "description": "Next joke",
+        "function": next_joke,
+    },
+    {
+        "name": "change_category",
+        "short": "c",
+        "description": "Change category",
+        "function": change_category,
+    },
+    {
+        "name": "change_language",
+        "short": "l",
+        "description": "Change language",
+        "function": change_language,
+    },
+    {
+        "name": "exit_bot",
+        "short": "q",
+        "description": "Exit",
+        "function": exit_bot,
+    },
+]
 
 
 def build_joke_graph() -> CompiledStateGraph:
     workflow = StateGraph(JokeState)
 
     workflow.add_node("show_menu", show_menu)
-    workflow.add_node("fetch_joke", fetch_joke)
-    workflow.add_node("change_category", change_category)
-    workflow.add_node("change_language", change_language)
-    workflow.add_node("exit_bot", exit_bot)
+
+    for node in nodes:
+        workflow.add_node(node["name"], node["function"])
 
     workflow.set_entry_point("show_menu")
 
     workflow.add_conditional_edges(
         "show_menu",
         route_choice,
-        {
-            "fetch_joke": "fetch_joke",
-            "change_category": "change_category",
-            "change_language": "change_language",
-            "exit_bot": "exit_bot",
-        },
     )
 
-    workflow.add_edge("fetch_joke", "show_menu")
+    workflow.add_edge("next_joke", "show_menu")
     workflow.add_edge("change_category", "show_menu")
     workflow.add_edge("change_language", "show_menu")
     workflow.add_edge("exit_bot", END)
