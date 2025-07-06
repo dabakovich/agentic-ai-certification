@@ -1,5 +1,4 @@
-from operator import add
-from typing import Annotated, List, Literal
+from typing import Annotated, List
 from pydantic import BaseModel
 from pyjokes import get_joke, CATEGORY_VALUES, LANGUAGE_VALUES
 import inquirer
@@ -12,8 +11,17 @@ class Joke(BaseModel):
     category: str
 
 
+def joke_reducer(current: List[Joke], new: List[Joke]) -> List[Joke]:
+    # Clear jokes if we're providing empty list
+    if not new:
+        return []
+
+    # Just concatenate jokes if we're providing new joke
+    return current + new
+
+
 class JokeState(BaseModel):
-    jokes: Annotated[List[Joke], add] = []
+    jokes: Annotated[List[Joke], joke_reducer] = []
     user_choice: str = "next_joke"
     category: str = "neutral"
     language: str = "en"
@@ -30,19 +38,15 @@ def show_menu(state: JokeState) -> dict:
     result = inquirer.prompt(
         [
             inquirer.List(
-                "description",
+                "name",
                 message="What option do you want to use?",
-                choices=[node["description"] for node in nodes],
+                choices=[(node["description"], node["name"]) for node in nodes],
             )
         ]
     )
     print("-" * 80)
 
-    user_choice = [
-        node["name"] for node in nodes if node["description"] == result["description"]
-    ][0]
-
-    return {"user_choice": user_choice}
+    return {"user_choice": result["name"]}
 
 
 def next_joke(state: JokeState) -> dict:
@@ -88,6 +92,11 @@ def change_language(state: JokeState) -> dict:
     return {"language": new_language}
 
 
+def reset_jokes(state: JokeState) -> dict:
+    print("Clearing jokes...")
+    return {"jokes": []}
+
+
 def exit_bot(state: JokeState) -> dict:
     return {"quit": True}
 
@@ -95,25 +104,26 @@ def exit_bot(state: JokeState) -> dict:
 nodes = [
     {
         "name": "next_joke",
-        "short": "n",
         "description": "Next joke",
         "function": next_joke,
     },
     {
         "name": "change_category",
-        "short": "c",
         "description": "Change category",
         "function": change_category,
     },
     {
         "name": "change_language",
-        "short": "l",
         "description": "Change language",
         "function": change_language,
     },
     {
+        "name": "reset_jokes",
+        "description": "Reset jokes",
+        "function": reset_jokes,
+    },
+    {
         "name": "exit_bot",
-        "short": "q",
         "description": "Exit",
         "function": exit_bot,
     },
@@ -138,6 +148,7 @@ def build_joke_graph() -> CompiledStateGraph:
     workflow.add_edge("next_joke", "show_menu")
     workflow.add_edge("change_category", "show_menu")
     workflow.add_edge("change_language", "show_menu")
+    workflow.add_edge("reset_jokes", "show_menu")
     workflow.add_edge("exit_bot", END)
 
     return workflow.compile()
