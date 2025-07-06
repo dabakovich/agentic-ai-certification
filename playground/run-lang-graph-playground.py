@@ -1,9 +1,39 @@
 from typing import Annotated, List
 from pydantic import BaseModel
-from pyjokes import get_joke, CATEGORY_VALUES, LANGUAGE_VALUES
+from pyjokes import LANGUAGE_VALUES
 import inquirer
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.graph import StateGraph, END
+from langchain.prompts import PromptTemplate
+from langchain.schema import SystemMessage, HumanMessage
+from langchain_ollama import ChatOllama
+
+
+system_message = SystemMessage(
+    """You are a basic joke generator.
+You will be providen category and language.
+Answer only with joke text, without any formatting and additional text.
+Don't provide translations if you generated joke in different language than English.
+You will be providen your previous jokes, don't repeat them."""
+)
+
+joke_prompt = PromptTemplate(
+    input_variables=["category", "language"],
+    template="""
+Category: {category}
+
+Language: {language}
+
+Previous jokes:
+{prev_jokes}
+""",
+)
+
+llm = ChatOllama(model="gemma3:4b", temperature=0.0)
+
+categories = ["programmer", "chuck", "dad"]
+languages = LANGUAGE_VALUES.copy()
+languages.add("ua")
 
 
 class Joke(BaseModel):
@@ -23,7 +53,7 @@ def joke_reducer(current: List[Joke], new: List[Joke]) -> List[Joke]:
 class JokeState(BaseModel):
     jokes: Annotated[List[Joke], joke_reducer] = []
     user_choice: str = "next_joke"
-    category: str = "neutral"
+    category: str = categories[0]
     language: str = "en"
     quit: bool = False
 
@@ -50,9 +80,15 @@ def show_menu(state: JokeState) -> dict:
 
 
 def next_joke(state: JokeState) -> dict:
-    joke_text = get_joke(language=state.language, category=state.category)
-    new_joke = Joke(text=joke_text, category=state.category)
+    prompt = joke_prompt.format(
+        category=state.category,
+        language=state.language,
+        prev_jokes="\n\n".join([joke.text for joke in state.jokes]),
+    )
+    llm_answer = llm.invoke([system_message, HumanMessage(prompt)])
+    joke_text = llm_answer.content
     print(joke_text)
+    new_joke = Joke(text=joke_text, category=state.category)
     return {"jokes": [new_joke]}
 
 
@@ -62,7 +98,7 @@ def change_category(state: JokeState) -> dict:
             inquirer.List(
                 "category",
                 message="What category do you want to use?",
-                choices=CATEGORY_VALUES,
+                choices=categories,
             )
         ]
     )
@@ -83,7 +119,7 @@ def change_language(state: JokeState) -> dict:
         if user_input.strip().lower() == "q":
             return
 
-        if user_input not in LANGUAGE_VALUES:
+        if user_input not in languages:
             print(f"The {new_language} is not available")
             continue
 
