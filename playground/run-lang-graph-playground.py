@@ -192,6 +192,8 @@ def build_joke_graph() -> CompiledStateGraph:
 
 def main():
     graph = build_joke_graph()
+    # Save png image of the graph
+    # graph.get_graph().draw_mermaid_png(output_file_path="joke_graph.png")
     graph.invoke(JokeState(), {"recursion_limit": 100})
 
 

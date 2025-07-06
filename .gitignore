@@ -40,6 +40,9 @@ data/
 *.log
 chroma/
 
+# Graphs
+*.png
+
 # OS
 .DS_Store
 Thumbs.db 
