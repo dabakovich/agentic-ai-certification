@@ -26,9 +26,9 @@ Rejected jokes:
 
 critic_system_message = SystemMessage(
     """You are joke critic.
-Send `yes` if the joke is funny. Send `no` if not.
+Send a float number between 0 and 1 how funny is the joke.
 
-Answer only with one word `yes` or `no`, without any additional text.
+Answer only with the number, without any additional text.
 """
 )
 

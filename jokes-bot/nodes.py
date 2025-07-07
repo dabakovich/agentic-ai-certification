@@ -1,5 +1,5 @@
 import inquirer
-from constants import categories, languages
+from constants import categories, languages, fun_treshold
 from langchain.schema import HumanMessage
 from prompts import (
     writer_prompt,
@@ -27,6 +27,7 @@ def show_menu(state: JokeState) -> dict:
                 choices=[
                     (node["description"], node["name"]) for node in main_menu_nodes
                 ],
+                carousel=True,
             )
         ]
     )
@@ -61,7 +62,7 @@ def critic_joke(state: JokeState) -> dict:
     llm_answer = llm.invoke([critic_system_message, HumanMessage(prompt)])
     print(llm_answer.content)
 
-    approved = True if llm_answer.content.strip().lower() == "yes" else False
+    approved = True if float(llm_answer.content.strip()) > fun_treshold else False
 
     print(f"The joke was {'approved' if approved else 'rejected'}, trying again")
 

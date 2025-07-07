@@ -3,7 +3,6 @@ from pydantic import BaseModel
 from classes import Joke
 from reducers import joke_reducer
 from constants import categories
-from operator import add
 
 
 class JokeState(BaseModel):
