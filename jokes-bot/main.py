@@ -1,7 +1,22 @@
 from langgraph.graph import END, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from state import JokeState
-from nodes import all_nodes, show_menu
+from nodes import (
+    main_menu_nodes,
+    show_menu,
+    critic_joke,
+    show_approved_joke,
+    retries_end,
+)
+
+
+def critic_router(state: JokeState):
+    if state.approved:
+        return "show_approved_joke"
+    elif len(state.rejected_jokes) > 4:
+        return "retries_end"
+    else:
+        return "generate_joke"
 
 
 def build_joke_graph() -> CompiledStateGraph:
@@ -9,8 +24,12 @@ def build_joke_graph() -> CompiledStateGraph:
 
     workflow.add_node("show_menu", show_menu)
 
-    for node in all_nodes:
+    for node in main_menu_nodes:
         workflow.add_node(node["name"], node["function"])
+
+    workflow.add_node("critic_joke", critic_joke)
+    workflow.add_node("show_approved_joke", show_approved_joke)
+    workflow.add_node("retries_end", retries_end)
 
     workflow.set_entry_point("show_menu")
 
@@ -19,7 +38,11 @@ def build_joke_graph() -> CompiledStateGraph:
         lambda state: state.user_choice,
     )
 
-    workflow.add_edge("next_joke", "show_menu")
+    workflow.add_conditional_edges("critic_joke", critic_router)
+
+    workflow.add_edge("generate_joke", "critic_joke")
+    workflow.add_edge("show_approved_joke", "show_menu")
+    workflow.add_edge("retries_end", "show_menu")
     workflow.add_edge("change_category", "show_menu")
     workflow.add_edge("change_language", "show_menu")
     workflow.add_edge("reset_jokes", "show_menu")

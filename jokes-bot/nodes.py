@@ -1,7 +1,12 @@
 import inquirer
 from constants import categories, languages
 from langchain.schema import HumanMessage
-from prompts import joke_prompt, system_message
+from prompts import (
+    writer_prompt,
+    writer_system_message,
+    critic_system_message,
+    critic_prompt,
+)
 from state import Joke, JokeState
 
 from llm import llm
@@ -19,7 +24,9 @@ def show_menu(state: JokeState) -> dict:
             inquirer.List(
                 "name",
                 message="What option do you want to use?",
-                choices=[(node["description"], node["name"]) for node in all_nodes],
+                choices=[
+                    (node["description"], node["name"]) for node in main_menu_nodes
+                ],
             )
         ]
     )
@@ -28,17 +35,55 @@ def show_menu(state: JokeState) -> dict:
     return {"user_choice": result["name"]}
 
 
-def next_joke(state: JokeState) -> dict:
-    prompt = joke_prompt.format(
+def generate_joke(state: JokeState) -> dict:
+    print("Generating new joke...")
+    prompt = writer_prompt.format(
         category=state.category,
         language=state.language,
         prev_jokes="\n\n".join([joke.text for joke in state.jokes]),
+        rejected_jokes="\n\n".join([joke.text for joke in state.rejected_jokes]),
     )
-    llm_answer = llm.invoke([system_message, HumanMessage(prompt)])
+    llm_answer = llm.invoke([writer_system_message, HumanMessage(prompt)])
     joke_text = llm_answer.content
-    print(joke_text)
-    new_joke = Joke(text=joke_text, category=state.category)
-    return {"jokes": [new_joke]}
+
+    print(
+        f"Generated new joke: {joke_text}, rejected count: {len(state.rejected_jokes)}"
+    )
+
+    joke_for_review = Joke(text=joke_text, category=state.category)
+    return {"joke_for_review": joke_for_review}
+
+
+def critic_joke(state: JokeState) -> dict:
+    print("Analyzing new joke...")
+    prompt = critic_prompt.format(joke=state.joke_for_review.text)
+
+    llm_answer = llm.invoke([critic_system_message, HumanMessage(prompt)])
+    print(llm_answer.content)
+
+    approved = True if llm_answer.content.strip().lower() == "yes" else False
+
+    print(f"The joke was {'approved' if approved else 'rejected'}, trying again")
+
+    return {
+        "approved": approved,
+        "rejected_jokes": [] if approved else [state.joke_for_review],
+    }
+
+
+def show_approved_joke(state: JokeState) -> dict:
+    print(state.joke_for_review.text)
+
+    return {
+        "jokes": [state.joke_for_review],
+        "joke_for_review": None,
+        "approved": False,
+    }
+
+
+def retries_end(state: JokeState) -> dict:
+    print("No one joke was approved")
+    return {"joke_for_review": None, "rejected_jokes": []}
 
 
 def change_category(state: JokeState) -> dict:
@@ -86,11 +131,11 @@ def exit_bot(state: JokeState) -> dict:
     return {"quit": True}
 
 
-all_nodes = [
+main_menu_nodes = [
     {
-        "name": "next_joke",
+        "name": "generate_joke",
         "description": "Next joke",
-        "function": next_joke,
+        "function": generate_joke,
     },
     {
         "name": "change_category",
