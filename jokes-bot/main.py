@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 from langgraph.graph import END, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from nodes import (
@@ -53,6 +54,8 @@ def build_joke_graph() -> CompiledStateGraph:
 
 
 def main():
+    load_dotenv()
+
     graph = build_joke_graph()
     # Save png image of the graph
     # graph.get_graph().draw_mermaid_png(output_file_path="joke_graph.png")
