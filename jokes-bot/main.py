@@ -37,9 +37,25 @@ def build_joke_graph() -> CompiledStateGraph:
     workflow.add_conditional_edges(
         "show_menu",
         lambda state: state.user_choice,
+        {
+            "generate_joke": "generate_joke",
+            "change_category": "change_category",
+            "change_language": "change_language",
+            "show_saved_jokes": "show_saved_jokes",
+            "reset_jokes": "reset_jokes",
+            "exit_bot": "exit_bot",
+        },
     )
 
-    workflow.add_conditional_edges("critic_joke", critic_router)
+    workflow.add_conditional_edges(
+        "critic_joke",
+        critic_router,
+        {
+            "show_approved_joke": "show_approved_joke",
+            "retries_end": "retries_end",
+            "generate_joke": "generate_joke",
+        },
+    )
 
     workflow.add_edge("generate_joke", "critic_joke")
     workflow.add_edge("show_approved_joke", "show_menu")
