@@ -148,6 +148,13 @@ def change_language(state: JokeState) -> dict:
     return {"language": new_language}
 
 
+def show_saved_jokes(state: JokeState) -> dict:
+    saved_jokes = store.retrieve_jokes()
+
+    print("\n\n".join([joke.text for joke in saved_jokes]))
+    return {}
+
+
 def reset_jokes(state: JokeState) -> dict:
     print("Clearing jokes...")
     return {"jokes": []}
@@ -172,6 +179,11 @@ main_menu_nodes = [
         "name": "change_language",
         "description": "Change language",
         "function": change_language,
+    },
+    {
+        "name": "show_saved_jokes",
+        "description": "Show saved jokes",
+        "function": show_saved_jokes,
     },
     {
         "name": "reset_jokes",

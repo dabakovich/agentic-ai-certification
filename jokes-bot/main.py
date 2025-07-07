@@ -45,6 +45,7 @@ def build_joke_graph() -> CompiledStateGraph:
     workflow.add_edge("retries_end", "show_menu")
     workflow.add_edge("change_category", "show_menu")
     workflow.add_edge("change_language", "show_menu")
+    workflow.add_edge("show_saved_jokes", "show_menu")
     workflow.add_edge("reset_jokes", "show_menu")
     workflow.add_edge("exit_bot", END)
 

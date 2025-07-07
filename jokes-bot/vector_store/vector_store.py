@@ -40,7 +40,7 @@ class VectorStore:
 
         documents = [joke.text]
         ids = [str(index)]
-        metadatas = [{"category": joke.category}]
+        metadatas = [joke.model_dump()]
 
         self.collection.add(
             documents=documents,
@@ -49,7 +49,7 @@ class VectorStore:
             metadatas=metadatas,
         )
 
-    def retrieve_jokes(
+    def retrieve_similar_jokes(
         self,
         joke: Joke,
         threshold: float = joke_similarity_treshold,
@@ -77,10 +77,18 @@ class VectorStore:
 
         return relevant_results
 
+    def retrieve_jokes(self, limit=10):
+        results = self.collection.get(limit=limit)
+
+        jokes = [Joke(**joke) for joke in results["metadatas"]]
+
+        return jokes
+
     def is_joke_exists(self, joke: Joke):
-        similar_jokes = self.retrieve_jokes(joke)
+        similar_jokes = self.retrieve_similar_jokes(joke)
 
         return len(similar_jokes["jokes"]) > 0
 
     def clear_collection(self):
+        print("Clearing collection...")
         self.client.clear_collection(self.collection_name)
