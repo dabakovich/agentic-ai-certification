@@ -1,13 +1,13 @@
 from langgraph.graph import END, StateGraph
 from langgraph.graph.state import CompiledStateGraph
-from state import JokeState
 from nodes import (
-    main_menu_nodes,
-    show_menu,
     critic_joke,
-    show_approved_joke,
+    main_menu_nodes,
     retries_end,
+    show_approved_joke,
+    show_menu,
 )
+from state import JokeState
 
 
 def critic_router(state: JokeState):

@@ -1,15 +1,24 @@
 import inquirer
-from constants import categories, languages, fun_treshold
+from constants import (
+    categories,
+    fun_treshold,
+    languages,
+    is_provide_prev_jokes_in_context,
+)
 from langchain.schema import HumanMessage
 from prompts import (
+    critic_prompt,
+    critic_system_message,
     writer_prompt,
     writer_system_message,
-    critic_system_message,
-    critic_prompt,
 )
 from state import Joke, JokeState
 
 from llm import llm
+from paths import VECTOR_DB_DIR
+from vector_store import ChromaDB, VectorStore
+
+store = VectorStore("jokes", chromadb=ChromaDB(VECTOR_DB_DIR))
 
 
 def show_menu(state: JokeState) -> dict:
@@ -41,7 +50,9 @@ def generate_joke(state: JokeState) -> dict:
     prompt = writer_prompt.format(
         category=state.category,
         language=state.language,
-        prev_jokes="\n\n".join([joke.text for joke in state.jokes]),
+        prev_jokes="\n\n".join([joke.text for joke in state.jokes])
+        if is_provide_prev_jokes_in_context
+        else None,
         rejected_jokes="\n\n".join([joke.text for joke in state.rejected_jokes]),
     )
     llm_answer = llm.invoke([writer_system_message, HumanMessage(prompt)])
@@ -56,7 +67,19 @@ def generate_joke(state: JokeState) -> dict:
 
 
 def critic_joke(state: JokeState) -> dict:
-    print("Analyzing new joke...")
+    if not is_provide_prev_jokes_in_context:
+        print("Analazing if the joke was used...")
+        is_joke_exists = store.is_joke_exists(state.joke_for_review)
+
+        if is_joke_exists:
+            print("Joke already exists, rejecting...")
+
+            return {
+                "approved": False,
+                "rejected_jokes": [state.joke_for_review],
+            }
+
+    print("Analyzing how funny joke is...")
     prompt = critic_prompt.format(joke=state.joke_for_review.text)
 
     llm_answer = llm.invoke([critic_system_message, HumanMessage(prompt)])
@@ -64,7 +87,7 @@ def critic_joke(state: JokeState) -> dict:
 
     approved = True if float(llm_answer.content.strip()) > fun_treshold else False
 
-    print(f"The joke was {'approved' if approved else 'rejected'}, trying again")
+    print(f"The joke was {'approved' if approved else 'rejected, trying again'}")
 
     return {
         "approved": approved,
@@ -74,6 +97,8 @@ def critic_joke(state: JokeState) -> dict:
 
 def show_approved_joke(state: JokeState) -> dict:
     print(state.joke_for_review.text)
+
+    store.insert_joke(state.joke_for_review)
 
     return {
         "jokes": [state.joke_for_review],
