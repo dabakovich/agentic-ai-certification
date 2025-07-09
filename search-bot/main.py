@@ -2,6 +2,7 @@ from typing import Annotated
 
 from dotenv import load_dotenv
 from langchain_tavily import TavilySearch
+from langchain.tools import tool
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
@@ -14,8 +15,16 @@ class State(BaseModel):
     messages: Annotated[list, add_messages] = []
 
 
+@tool
+def add_numbers_tool(number_1: float, number_2: float) -> float:
+    """Tool for precise adding two numbers"""
+
+    print("Adding two numbers")
+    return number_1 + number_2
+
+
 def get_tools():
-    return [TavilySearch(max_results=5, search_depth="advanced")]
+    return [TavilySearch(max_results=5, search_depth="advanced"), add_numbers_tool]
 
 
 def llm_node(state: State):
@@ -78,10 +87,11 @@ def main():
     iniitial_state = State(
         messages=[
             SystemMessage(
-                "You are a helpful assistant with access to web search. Use search tool when you need current information."
+                "You are a helpful assistant with access to web search. Use search tool when you need current information. You have also a tool for adding numbers. Use it when needed."
             ),
-            HumanMessage("What weather will be in Lviv, Ukraine on this Sunday?"),
+            # HumanMessage("What weather will be in Lviv, Ukraine on this Sunday?"),
             # HumanMessage("What's the latest news about AI developments in 2025?"),
+            HumanMessage("What is 333+444?"),
         ]
     )
 
