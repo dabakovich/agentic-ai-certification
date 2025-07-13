@@ -10,26 +10,22 @@ class State(BaseModel):
     final_result: list[str] = []
 
 
-def planner_node(state: State):
-    print("Planing next steps...")
-
-
-def gazeteer_result_node(state: State):
+def gazeteer_extraction_node(state: State):
     print("Making gazeteer tags...")
     return {"gazetteer_result": ["a"]}
 
 
-def ner_result_node(state: State):
+def ner_extraction_node(state: State):
     print("Making NER tags...")
     return {"ner_result": ["b"]}
 
 
-def llm_result_node(state: State):
+def llm_extraction_node(state: State):
     print("Making LLM tags...")
     return {"llm_result": ["c"]}
 
 
-def union_node(state: State):
+def aggregation_node(state: State):
     print("In the union node")
     if state.gazetteer_result and state.ner_result and state.llm_result:
         return {
@@ -41,13 +37,13 @@ def final_node(state: State):
     print("In the final node")
     if state.final_result:
         print(state.final_result)
-
-    print("No tags were extracted")
+    else:
+        print("No tags were extracted")
 
 
 def router(state: State):
     if state.document:
-        return ["gazeteer_result_node", "ner_result_node", "llm_result_node"]
+        return ["gazeteer_extraction", "ner_extraction", "llm_extraction"]
 
     return "final_node"
 
@@ -55,30 +51,26 @@ def router(state: State):
 def create_agent():
     graph = StateGraph(State)
 
-    graph.add_node("planner_node", planner_node)
-    graph.add_node("gazeteer_result_node", gazeteer_result_node)
-    graph.add_node("ner_result_node", ner_result_node)
-    graph.add_node("llm_result_node", llm_result_node)
-    graph.add_node("union_node", union_node)
+    graph.add_node("gazeteer_extraction", gazeteer_extraction_node)
+    graph.add_node("ner_extraction", ner_extraction_node)
+    graph.add_node("llm_extraction", llm_extraction_node)
+    graph.add_node("aggregation", aggregation_node)
     graph.add_node("final_node", final_node)
 
-    graph.set_entry_point("planner_node")
-
-    graph.add_conditional_edges(
-        "planner_node",
+    graph.set_conditional_entry_point(
         router,
         {
-            "gazeteer_result_node": "gazeteer_result_node",
-            "ner_result_node": "ner_result_node",
-            "llm_result_node": "llm_result_node",
+            "gazeteer_extraction": "gazeteer_extraction",
+            "ner_extraction": "ner_extraction",
+            "llm_extraction": "llm_extraction",
             "final_node": "final_node",
         },
     )
 
     graph.add_edge(
-        ["gazeteer_result_node", "ner_result_node", "llm_result_node"], "union_node"
+        ["gazeteer_extraction", "ner_extraction", "llm_extraction"], "aggregation"
     )
-    graph.add_edge("union_node", "final_node")
+    graph.add_edge("aggregation", "final_node")
     graph.add_edge("final_node", END)
 
     return graph.compile()
@@ -87,7 +79,7 @@ def create_agent():
 def main():
     agent = create_agent()
 
-    agent.invoke(State())
+    agent.invoke(State(document="Hey"))
 
 
 if __name__ == "__main__":
