@@ -1,4 +1,4 @@
-from constants import NODE
+from constants import MANAGER, REVIEWER, TITLE_GENERATOR, TLDR_GENERATOR
 from graphs.a3_graph import build_a3_graph
 from states.a3_state import initialize_a3_state
 from utils import load_config, load_publication_example
@@ -11,10 +11,10 @@ def run_a3_agent(text: str):
 
     initial_state = initialize_a3_state(
         input_text=text,
-        manager_config=agents_config[NODE.MANAGER.value]["prompt_config"],
-        tldr_config=agents_config[NODE.TLDR_GENERATOR.value]["prompt_config"],
-        title_config=agents_config[NODE.TITLE_GENERATOR.value]["prompt_config"],
-        reviewer_config=agents_config[NODE.REVIEWER.value]["prompt_config"],
+        manager_config=agents_config[MANAGER]["prompt_config"],
+        tldr_config=agents_config[TLDR_GENERATOR]["prompt_config"],
+        title_config=agents_config[TITLE_GENERATOR]["prompt_config"],
+        reviewer_config=agents_config[REVIEWER]["prompt_config"],
         max_revisions=10,
     )
 

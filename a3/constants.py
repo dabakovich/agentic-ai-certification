@@ -7,31 +7,33 @@ class ROLE(Enum):
     HUMAN = "human"
 
 
-class NODE(Enum):
-    MANAGER = "manager"
-    TITLE_GENERATOR = "title_generator"
-    TLDR_GENERATOR = "tldr_generator"
-    REVIEWER = "reviewer"
+# NODES
+
+MANAGER = "manager"
+TITLE_GENERATOR = "title_generator"
+TLDR_GENERATOR = "tldr_generator"
+REVIEWER = "reviewer"
 
 
-class FIELD(Enum):
-    INPUT_TEXT = "input_text"
+# FIELDS
 
-    MANAGER_MESSAGES = "manager_messages"
-    MANAGER_BRIEF = "manager_brief"
+INPUT_TEXT = "input_text"
 
-    TITLE_GEN_MESSAGES = "title_gen_messages"
-    TLDR_GEN_MESSAGES = "tldr_gen_messages"
-    REVIEWER_MESSAGES = "reviewer_messages"
+MANAGER_MESSAGES = "manager_messages"
+MANAGER_BRIEF = "manager_brief"
 
-    TLDR = "tldr"
-    TITLE = "title"
+TITLE_GEN_MESSAGES = "title_gen_messages"
+TLDR_GEN_MESSAGES = "tldr_gen_messages"
+REVIEWER_MESSAGES = "reviewer_messages"
 
-    REVISION_ROUND = "revision_round"
-    NEEDS_REVISION = "needs_revision"
+TLDR = "tldr"
+TITLE = "title"
 
-    TLDR_FEEDBACK = "tldr_feedback"
-    TITLE_FEEDBACK = "title_feedback"
+REVISION_ROUND = "revision_round"
+NEEDS_REVISION = "needs_revision"
 
-    TLDR_APPROVED = "tldr_approved"
-    TITLE_APPROVED = "title_approved"
+TLDR_FEEDBACK = "tldr_feedback"
+TITLE_FEEDBACK = "title_feedback"
+
+TLDR_APPROVED = "tldr_approved"
+TITLE_APPROVED = "title_approved"

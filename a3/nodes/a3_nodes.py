@@ -1,6 +1,22 @@
 from typing import Any, Callable, Dict, Literal
 
-from constants import FIELD, NODE
+from constants import (
+    MANAGER_BRIEF,
+    MANAGER_MESSAGES,
+    NEEDS_REVISION,
+    REVIEWER_MESSAGES,
+    REVISION_ROUND,
+    TITLE,
+    TITLE_APPROVED,
+    TITLE_FEEDBACK,
+    TITLE_GEN_MESSAGES,
+    TITLE_GENERATOR,
+    TLDR,
+    TLDR_APPROVED,
+    TLDR_FEEDBACK,
+    TLDR_GEN_MESSAGES,
+    TLDR_GENERATOR,
+)
 from langchain_core.messages import HumanMessage
 from states.a3_state import A3State
 
@@ -20,11 +36,11 @@ def make_manager_node(llm_model: str) -> NodeType:
         human_message = HumanMessage(content)
 
         return {
-            FIELD.MANAGER_MESSAGES.value: [ai_response],
-            FIELD.MANAGER_BRIEF.value: [ai_response],
-            FIELD.TITLE_GEN_MESSAGES.value: [human_message],
-            FIELD.TLDR_GEN_MESSAGES.value: [human_message],
-            FIELD.REVIEWER_MESSAGES.value: [human_message],
+            MANAGER_MESSAGES: [ai_response],
+            MANAGER_BRIEF: content,
+            TITLE_GEN_MESSAGES: [human_message],
+            TLDR_GEN_MESSAGES: [human_message],
+            REVIEWER_MESSAGES: [human_message],
         }
 
     return manager_node
@@ -55,9 +71,9 @@ def make_tldr_generator_node(llm_model: str) -> NodeType:
         content = ai_response.content.strip()
 
         return {
-            FIELD.TLDR_GEN_MESSAGES.value: [messages[-1], ai_response],
-            FIELD.TLDR.value: content,
-            FIELD.TLDR_FEEDBACK.value: "",
+            TLDR_GEN_MESSAGES: [messages[-1], ai_response],
+            TLDR: content,
+            TLDR_FEEDBACK: "",
         }
 
     return tldr_generator_node
@@ -88,9 +104,9 @@ def make_title_generator_node(llm_model: str) -> NodeType:
         content = ai_response.content.strip()
 
         return {
-            FIELD.TITLE_GEN_MESSAGES.value: [messages[-1], ai_response],
-            FIELD.TITLE.value: content,
-            FIELD.TITLE_FEEDBACK.value: "",
+            TITLE_GEN_MESSAGES: [messages[-1], ai_response],
+            TITLE: content,
+            TITLE_FEEDBACK: "",
         }
 
     return title_generator_node
@@ -109,9 +125,9 @@ def make_reviewer_node(llm_model: str) -> NodeType:
                 "🔒 Reviewer: Maximum revisions reached, forcing approval for all components."
             )
             return {
-                FIELD.NEEDS_REVISION.value: False,
-                FIELD.TITLE_APPROVED.value: True,
-                FIELD.TLDR_APPROVED.value: True,
+                NEEDS_REVISION: False,
+                TITLE_APPROVED: True,
+                TLDR_APPROVED: True,
             }
 
         print("📝 Reviewer: Generating feedback...")
@@ -146,23 +162,23 @@ def make_reviewer_node(llm_model: str) -> NodeType:
 
         if not overall_approved:
             return {
-                FIELD.NEEDS_REVISION.value: True,
-                FIELD.REVISION_ROUND.value: revision_round,
-                FIELD.TLDR_FEEDBACK.value: response.tldr_feedback,
-                FIELD.TITLE_FEEDBACK.value: response.title_feedback,
-                FIELD.TLDR_APPROVED.value: response.tldr_approved,
-                FIELD.TITLE_APPROVED.value: response.title_approved,
+                NEEDS_REVISION: True,
+                REVISION_ROUND: revision_round,
+                TLDR_FEEDBACK: response.tldr_feedback,
+                TITLE_FEEDBACK: response.title_feedback,
+                TLDR_APPROVED: response.tldr_approved,
+                TITLE_APPROVED: response.title_approved,
             }
         else:
             print("✅ All components approved - proceeding to final output")
 
             return {
-                FIELD.NEEDS_REVISION.value: False,
-                FIELD.REVISION_ROUND.value: revision_round,
-                FIELD.TLDR_FEEDBACK.value: response.tldr_feedback,
-                FIELD.TITLE_FEEDBACK.value: response.title_feedback,
-                FIELD.TLDR_APPROVED.value: response.tldr_approved,
-                FIELD.TITLE_APPROVED.value: response.title_approved,
+                NEEDS_REVISION: False,
+                REVISION_ROUND: revision_round,
+                TLDR_FEEDBACK: response.tldr_feedback,
+                TITLE_FEEDBACK: response.title_feedback,
+                TLDR_APPROVED: response.tldr_approved,
+                TITLE_APPROVED: response.title_approved,
             }
 
     return reviewer_node
@@ -179,6 +195,6 @@ def route_from_reviewer(state: A3State) -> Literal["revision_dispatcher", "end"]
     else:
         print("🔄 Some components need revision - routing to revision dispatcher")
         return [
-            NODE.TLDR_GENERATOR.value,
-            NODE.TITLE_GENERATOR.value,
+            TLDR_GENERATOR,
+            TITLE_GENERATOR,
         ]

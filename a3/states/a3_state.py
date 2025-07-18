@@ -69,6 +69,7 @@ def initialize_a3_state(
     return A3State(
         input_text=input_text,
         manager_messages=manager_messages,
+        manager_brief=None,
         title_gen_messages=title_gen_messages,
         tldr_gen_messages=tldr_gen_messages,
         reviewer_messages=reviewer_messages,
