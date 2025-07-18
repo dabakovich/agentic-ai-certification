@@ -1,10 +1,10 @@
-from typing import Optional, Annotated
-from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
-from langgraph.graph.message import AnyMessage, add_messages
+from typing import Annotated, Optional
 
-from pydantic import BaseModel
-from types import PromptConfig
+from classes import PromptConfig
+from langchain_core.messages import SystemMessage
+from langgraph.graph.message import AnyMessage, add_messages
 from prompt_builder import build_prompt_body
+from pydantic import BaseModel
 
 
 class A3State(BaseModel):
@@ -12,10 +12,13 @@ class A3State(BaseModel):
 
     input_text: str
 
-    manager_messages: Optional[str]
+    manager_messages: Annotated[list[AnyMessage], add_messages]
+    manager_brief: Optional[str]
 
     title_gen_messages: Annotated[list[AnyMessage], add_messages]
     tldr_gen_messages: Annotated[list[AnyMessage], add_messages]
+
+    reviewer_messages: Annotated[list[AnyMessage], add_messages]
 
     tldr: Optional[str]
     title: Optional[str]
@@ -42,23 +45,23 @@ def initialize_a3_state(
     max_revisions: int,
 ) -> A3State:
     manager_messages = [
-        SystemMessage(build_prompt_body(manager_config)),
+        SystemMessage(build_prompt_body(PromptConfig.model_validate(manager_config))),
         # Think to move it into node
         SystemMessage(f"Here's your input text:\n\n{input_text}"),
     ]
     title_gen_messages = [
-        SystemMessage(build_prompt_body(title_config)),
+        SystemMessage(build_prompt_body(PromptConfig.model_validate(title_config))),
         # Think to move it into node
         SystemMessage(f"Here's your input text for title generation:\n\n{input_text}"),
     ]
     tldr_gen_messages = [
-        SystemMessage(build_prompt_body(tldr_config)),
+        SystemMessage(build_prompt_body(PromptConfig.model_validate(tldr_config))),
         # Think to move it into node
         SystemMessage(f"Here's your input text for TL;DR generation:\n\n{input_text}"),
     ]
 
     reviewer_messages = [
-        SystemMessage(build_prompt_body(reviewer_config)),
+        SystemMessage(build_prompt_body(PromptConfig.model_validate(reviewer_config))),
         # Think to move it into node
         SystemMessage(f"Here's your input text for review work:\n\n{input_text}"),
     ]

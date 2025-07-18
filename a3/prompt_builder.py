@@ -1,6 +1,6 @@
-from types import PromptConfig
 from typing import List, Union
 
+from classes import PromptConfig
 from utils import load_config
 
 from paths import REASONING_FILE_PATH

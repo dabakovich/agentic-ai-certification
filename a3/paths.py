@@ -4,6 +4,8 @@ ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 A3_DIR = os.path.join(ROOT_DIR, "a3")
 
+DATA_DIR = os.path.join(ROOT_DIR, "data")
+
 CONFIG_DIR = os.path.join(A3_DIR, "config")
 
 CONFIG_FILE_PATH = os.path.join(CONFIG_DIR, "config.yaml")
