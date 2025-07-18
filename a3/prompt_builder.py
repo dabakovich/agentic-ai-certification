@@ -1,20 +1,9 @@
-from typing import Union, List, Optional
-from pydantic import BaseModel
+from types import PromptConfig
+from typing import List, Union
+
 from utils import load_config
+
 from paths import REASONING_FILE_PATH
-
-
-class PromptConfig(BaseModel):
-    instruction: str | List[str]
-    role: Optional[str] = None
-    context: Optional[str] = None
-    output_constraints: Optional[str | List[str]] = None
-    style_or_tone: Optional[str | List[str]] = None
-    output_format: Optional[str | List[str]] = None
-    examples: Optional[str | List[str]] = None
-    goal: Optional[str] = None
-    reasoning_strategy: Optional[str] = None
-
 
 reasoning_strategies = load_config(REASONING_FILE_PATH)["reasoning_strategies"]
 
@@ -34,7 +23,7 @@ def format_prompt_section(
     return f"{lead_in}\n{formatted_value}"
 
 
-def prompt_builder(prompt_config: PromptConfig, input_data: str = "") -> str:
+def build_prompt_body(prompt_config: PromptConfig, input_data: str = "") -> str:
     prompt_parts = []
 
     if role := prompt_config.role:
@@ -92,21 +81,7 @@ def prompt_builder(prompt_config: PromptConfig, input_data: str = "") -> str:
         if strategy_prompt:
             prompt_parts.append(strategy_prompt.strip())
 
-    # if finalize:
-    #     prompt_parts.append("Now perform the task as instructed above.")
+    if input_data:
+        prompt_parts.append("Now perform the task as instructed above.")
 
     return "\n\n".join(prompt_parts)
-
-
-def main():
-    config_obj = load_config()
-    print(config_obj["a3"]["agents"]["manager"]["prompt_config"])
-    config = PromptConfig.model_validate(
-        config_obj["a3"]["agents"]["manager"]["prompt_config"]
-    )
-
-    print(prompt_builder(config))
-
-
-if __name__ == "__main__":
-    main()
