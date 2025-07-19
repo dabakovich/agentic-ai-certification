@@ -2,6 +2,7 @@ from constants import MANAGER, REVIEWER, TITLE_GENERATOR, TLDR_GENERATOR
 from graphs.a3_graph import build_a3_graph
 from states.a3_state import initialize_a3_state
 from utils import load_config, load_publication_example
+from dotenv import load_dotenv
 
 
 def run_a3_agent(text: str):
@@ -26,6 +27,8 @@ def run_a3_agent(text: str):
 
 
 def main():
+    load_dotenv(override=True)
+
     sample_text = load_publication_example(1)
     response = run_a3_agent(sample_text)
 
