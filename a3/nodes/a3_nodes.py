@@ -17,7 +17,7 @@ from constants import (
     TLDR_GEN_MESSAGES,
     TLDR_GENERATOR,
 )
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessage
 from states.a3_state import A3State
 
 from llm import get_llm
@@ -160,6 +160,8 @@ def make_reviewer_node(llm_model: str) -> NodeType:
         ]
         print(f"📊 Component Status: {' | '.join(components_status)}")
 
+        ai_message = AIMessage(response.model_dump_json())
+
         if not overall_approved:
             return {
                 NEEDS_REVISION: True,
@@ -168,6 +170,7 @@ def make_reviewer_node(llm_model: str) -> NodeType:
                 TITLE_FEEDBACK: response.title_feedback,
                 TLDR_APPROVED: response.tldr_approved,
                 TITLE_APPROVED: response.title_approved,
+                REVIEWER_MESSAGES: [ai_message],
             }
         else:
             print("✅ All components approved - proceeding to final output")
@@ -179,6 +182,7 @@ def make_reviewer_node(llm_model: str) -> NodeType:
                 TITLE_FEEDBACK: response.title_feedback,
                 TLDR_APPROVED: response.tldr_approved,
                 TITLE_APPROVED: response.title_approved,
+                REVIEWER_MESSAGES: [ai_message],
             }
 
     return reviewer_node
