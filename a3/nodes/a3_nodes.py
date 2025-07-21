@@ -55,7 +55,7 @@ def make_tldr_generator_node(llm_model: str) -> NodeType:
             return {}
 
         print("🎯 TL;DR Generator: Creating TL;DR...")
-        messages = state.title_gen_messages
+        messages = state.tldr_gen_messages
         reviewer_message = HumanMessage(
             f"Following is the review from your reviewer:\n\n {state.tldr_feedback or 'No feedback provided'}\n\n"
         )
