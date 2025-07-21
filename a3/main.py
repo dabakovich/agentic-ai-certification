@@ -3,6 +3,7 @@ from graphs.a3_graph import build_a3_graph
 from states.a3_state import initialize_a3_state
 from utils import load_config, load_publication_example
 from dotenv import load_dotenv
+from states.a3_state import A3State
 
 
 def run_a3_agent(text: str):
@@ -32,17 +33,19 @@ def main():
     sample_text = load_publication_example(1)
     response = run_a3_agent(sample_text)
 
+    state = A3State.model_validate(response)
+
     print("=" * 80)
     print("🔍 A3-SYSTEM DEMO")
     print("=" * 80)
     print("Manager brief:")
-    print(response["manager_brief"])
+    print(state.manager.brief)
     print("=" * 80)
     print("Title:")
-    print(response["title"])
+    print(state.title_generator.draft)
     print("=" * 80)
     print("TL;DR:")
-    print(response["tldr"])
+    print(state.tldr_generator.draft)
     print("=" * 80)
 
 

@@ -5,9 +5,8 @@ from langgraph.graph import END, START, StateGraph
 from nodes.a3_nodes import (
     make_manager_node,
     make_reviewer_node,
-    make_title_generator_node,
-    make_tldr_generator_node,
     route_from_reviewer,
+    make_reviewable_generator_node,
 )
 from states.a3_state import A3State
 
@@ -19,12 +18,13 @@ def build_a3_graph(a3_config: Dict[str, Any]) -> StateGraph:
     manager_node = make_manager_node(a3_config["agents"][MANAGER]["llm"])
     graph.add_node(MANAGER, manager_node)
 
-    tldr_generator_node = make_tldr_generator_node(
-        a3_config["agents"][TLDR_GENERATOR]["llm"]
+    tldr_generator_node = make_reviewable_generator_node(
+        a3_config["agents"][TLDR_GENERATOR]["llm"], TLDR_GENERATOR
     )
     graph.add_node(TLDR_GENERATOR, tldr_generator_node)
-    title_generator_node = make_title_generator_node(
-        a3_config["agents"][TITLE_GENERATOR]["llm"]
+
+    title_generator_node = make_reviewable_generator_node(
+        a3_config["agents"][TITLE_GENERATOR]["llm"], TITLE_GENERATOR
     )
     graph.add_node(TITLE_GENERATOR, title_generator_node)
 
