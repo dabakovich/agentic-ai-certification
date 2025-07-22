@@ -1,4 +1,4 @@
-from typing import Annotated, Generic, Literal, Optional, TypeVar, Dict
+from typing import Annotated, Generic, Literal, Optional, TypeVar, Type, Dict
 
 from classes import PromptConfig
 from langchain_core.messages import SystemMessage
@@ -17,6 +17,18 @@ class Manager(Conversation, BaseModel):
 
 T = TypeVar("T")
 
+C = TypeVar("C", bound=BaseModel)
+
+
+def create_merge_model(model_class: Type[C]):
+    def merge_model(left: model_class | None, right: Dict) -> C:
+        if not left:
+            return model_class(**right)
+
+        return left.model_copy(update=right)
+
+    return merge_model
+
 
 class Reviewable(Conversation, BaseModel, Generic[T]):
     # Will be the final version when approved
@@ -30,10 +42,14 @@ class A3State(BaseModel):
 
     input_text: str
 
-    manager: Manager = Manager()
+    manager: Annotated[Optional[Manager], create_merge_model(Manager)] = Manager()
 
-    title_generator: Reviewable = Reviewable[str]()
-    tldr_generator: Reviewable = Reviewable[str]()
+    title_generator: Annotated[Optional[Reviewable], create_merge_model(Reviewable)] = (
+        Reviewable[str]()
+    )
+    tldr_generator: Annotated[Optional[Reviewable], create_merge_model(Reviewable)] = (
+        Reviewable[str]()
+    )
 
     reviewer: Conversation = Conversation()
 

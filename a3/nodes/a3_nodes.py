@@ -137,12 +137,10 @@ def make_reviewer_node(llm_model: str) -> NodeType:
 
         reviewables_state = {
             TITLE_GENERATOR: {
-                "draft": state.title_generator.draft,
                 "feedback": response.title_feedback,
                 "status": "approved" if response.title_approved else "needs_revision",
             },
             TLDR_GENERATOR: {
-                "draft": state.tldr_generator.draft,
                 "feedback": response.tldr_feedback,
                 "status": "approved" if response.tldr_approved else "needs_revision",
             },
