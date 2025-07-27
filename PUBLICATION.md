@@ -1,0 +1,90 @@
+## TL;DR
+
+This project implements a basic Retrieval-Augmented Generation (RAG) assistant. It uses a vector store to find relevant documents and an LLM to generate answers based on that context. The user can interact with it through a command-line interface, add new documents, and choose from different local or remote LLMs.
+
+## Abstraction
+
+This is a command-line RAG application that answers questions based on a provided set of documents. It is built with Python and leverages LangChain for interacting with LLMs and a vector store. The core components are:
+
+- **Vector Store**: Uses ChromaDB to store and retrieve document embeddings. It employs a HuggingFace model for creating embeddings.
+- **LLM Client**: Connects to both local (via Ollama) and remote (via OpenAI) language models.
+- **Conversation Manager**: Handles the main chat loop, maintains conversation history, and orchestrates the RAG pipeline.
+- **CLI**: A simple command-line interface for user interaction.
+
+## Motivation
+
+The goal of this project is to create a simple, easy-to-understand RAG assistant that can be extended and modified. It serves as a learning tool for understanding the core concepts of RAG and as a foundation for building more complex conversational AI applications. The motivation is to provide a clear and concise example of how to build a RAG system from scratch.
+
+## Instruction for run
+
+1.  **Activate virtual environment**:
+    Before you begin, make sure to activate your Python virtual environment.
+    ```bash
+    source venv/bin/activate
+    ```
+2.  **Install dependencies**:
+    ```bash
+    pip install -r requirements.txt
+    ```
+3.  **Set up environment variables**:
+    Create a `.env` file in the root directory and add your OpenAI API key:
+    ```
+    OPENAI_API_KEY="your-api-key"
+    ```
+4.  **Add data**:
+    Place your JSON files with publications in the `data/` directory. The JSON file should be an array of objects, with each object having `id`, `title`, and `publication_description` keys.
+5.  **Run the application**:
+    ```bash
+    python src/main.py
+    ```
+6.  **Interact with the assistant**:
+    - The application will first ask you if you want to manage the vector store or start a conversation.
+    - If you choose to manage the vector store, you can add new publications, check the number of documents, or clear the store.
+    - If you choose to start a conversation, you'll be prompted to select an LLM, and then you can start asking questions.
+
+## Methodology
+
+The application follows a standard RAG pipeline:
+
+1.  **Data Ingestion**: The user can add publications from JSON files. The text from these publications is chunked into smaller pieces.
+2.  **Embedding**: A HuggingFace sentence-transformer model (`all-MiniLM-L6-v2`) is used to create vector embeddings for each text chunk.
+3.  **Vector Storage**: The embeddings and the corresponding text chunks are stored in a persistent ChromaDB collection.
+4.  **Retrieval**: When the user asks a question, the same embedding model is used to create an embedding for the query. The application then queries the vector store to find the most similar text chunks (based on cosine similarity).
+5.  **Generation**: The retrieved text chunks are used as context for a language model. The application uses a prompt template to combine the context and the user's question, and then sends it to the selected LLM (either local or OpenAI) to generate an answer.
+6.  **Conversation Memory**: The conversation history is stored in a JSON file to maintain context throughout the session.
+7.  **Dependency Injection**: The application uses a dependency injection framework to manage and inject dependencies, such as the vector store, into different components. This promotes a modular and testable architecture.
+
+```mermaid
+graph TD
+    subgraph "User"
+        A["<br/>User<br/>"]
+    end
+
+    subgraph "RAG Assistant"
+        B["CLI"]
+        C["Conversation Manager"]
+        D["Vector Store<br/>(ChromaDB)"]
+        E["LLM<br/>(OpenAI/Local)"]
+    end
+
+    subgraph "Data"
+        F["<br/>JSON<br/>Documents"]
+    end
+
+    A -- "Asks question" --> B
+    B -- " " --> C
+    C -- "Retrieves context" --> D
+    C -- "Sends prompt + context" --> E
+    E -- "Generates answer" --> C
+    C -- " " --> B
+    B -- "Displays answer" --> A
+
+    F -- "Data Ingestion" --> D
+```
+
+## Conclusions
+
+This project is a simple demonstration of a RAG assistant. Working with it revealed a few key insights:
+
+- Using "dumber" local models is highly beneficial for development. It forces more careful prompt engineering and tuning of the retrieval process, as the model is less likely to generate correct answers without accurate context.
+- The current implementation always queries the vector store. A valuable future improvement would be to introduce a decision-making agent. This agent could determine whether a user's query requires a database search or if it can be answered directly, making the assistant "smarter" and more efficient.
