@@ -1,4 +1,4 @@
-# Personal Publications RAG Assistant: A CLI-Based Document Query System
+# Personal Knowledge RAG: CLI for Querying Research Publications
 
 ## Metadata
 
