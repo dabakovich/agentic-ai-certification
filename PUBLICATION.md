@@ -1,6 +1,13 @@
-# Simple RAG Assistant v1.0.0
+# Personal Publications RAG Assistant: A CLI-Based Document Query System
 
-### 1. Overview
+## Metadata
+
+- **Version**: 1.0.0
+- **License**: MIT
+- **Language**: Python 3.8+
+- **Dependencies**: LangChain, ChromaDB, HuggingFace Transformers, OpenAI API
+
+### Overview
 
 #### TL;DR
 
@@ -10,7 +17,7 @@ This project implements a basic Retrieval-Augmented Generation (RAG) assistant. 
 
 The goal of this project is to create a simple, easy-to-understand RAG assistant that can be extended and modified. It serves as a learning tool for understanding the core concepts of RAG and as a foundation for building more complex conversational AI applications. The motivation is to provide a clear and concise example of how to build a RAG system from scratch.
 
-### 2. System Architecture
+### System Architecture
 
 #### Abstraction
 
@@ -51,7 +58,7 @@ graph TD
     F -- "Data Ingestion" --> D
 ```
 
-### 3. User Guide
+### User Guide
 
 #### Instructions for Use
 
@@ -80,7 +87,7 @@ graph TD
     - If you choose to manage the vector store, you can add new publications, check the number of documents, or clear the store.
     - If you choose to start a conversation, you'll be prompted to select an LLM, and then you can start asking questions.
 
-### 4. Implementation Details
+### Implementation Details
 
 #### Methodology
 
@@ -98,7 +105,7 @@ The application follows a standard RAG pipeline:
 
 The project uses `RecursiveCharacterTextSplitter` from LangChain to divide documents into smaller chunks. This splitter is configured to create chunks of approximately 1000 characters with a 200-character overlap. This method is effective because it attempts to split text along natural semantic boundaries, such as paragraphs and sentences, which helps to keep related concepts within the same chunk. The overlap between chunks ensures that context is not lost at the boundaries.
 
-### 5. Project Governance
+### Project Governance
 
 #### Safety Measures
 
@@ -112,9 +119,31 @@ This project follows Semantic Versioning (e.g., MAJOR.MINOR.PATCH) to track and 
 
 This project is maintained for demonstration purposes. Support is provided on a best-effort basis as this is a personal project.
 
-### 6. Conclusions
+### Conclusions
 
 This project is a simple demonstration of a RAG assistant. Working with it revealed a few key insights:
 
 - Using "dumber" local models is highly beneficial for development. It forces more careful prompt engineering and tuning of the retrieval process, as the model is less likely to generate correct answers without accurate context.
 - The current implementation always queries the vector store. A valuable future improvement would be to introduce a decision-making agent. This agent could determine whether a user's query requires a database search or if it can be answered directly, making the assistant "smarter" and more efficient.
+
+### Future Improvements
+
+#### Query Processing Intelligence
+
+- **Intent Classification**: Determine if queries need document retrieval or direct answers
+- **Query Expansion**: Use synonyms and query rewriting for better document matching
+- **Multi-query Generation**: Create multiple search variations from complex queries
+
+#### Performance & Monitoring
+
+- **Retrieval Metrics**: Implement Precision@K, Recall@K, and MRR for systematic evaluation
+- **Usage Analytics**: Track query patterns and document access frequency
+- **Response Time Monitoring**: Log and optimize retrieval and generation latency
+
+#### Testing Query Results
+
+- **Test Query Dataset**: Create standardized test queries with expected document retrievals
+  - Example: "What are the main findings about machine learning?" → Expected: Publications containing ML research results
+  - Example: "Who are the authors of neural network papers?" → Expected: Author names from relevant publications
+- **Automated Testing**: Regular evaluation of retrieval accuracy against ground truth
+- **Regression Testing**: Ensure system changes don't degrade existing query performance
